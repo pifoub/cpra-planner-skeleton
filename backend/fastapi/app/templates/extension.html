@@ -1,0 +1,6 @@
+
+<p>Subject: Public Records Act – Extension of Time</p>
+<p>Dear {{ request.requester.name }},</p>
+<p>We are extending the time to respond due to {{ request.extension.reasons | join(', ') }}, as permitted by law.
+We will provide our determination on or before <strong>{{ timeline.extensionDue }}</strong>.</p>
+<p>Sincerely,<br>{{ agency.signatureBlock if agency else 'Agency Staff' }}</p>

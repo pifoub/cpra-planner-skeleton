@@ -1,0 +1,1 @@
+@tailwind base; @tailwind components; @tailwind utilities; .btn{ @apply px-3 py-2 rounded border; } .btn-primary{ @apply px-3 py-2 rounded bg-blue-600 text-white; } .card{ @apply p-4 rounded border shadow-sm bg-white; }

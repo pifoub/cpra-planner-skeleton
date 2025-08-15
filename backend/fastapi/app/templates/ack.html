@@ -1,0 +1,10 @@
+
+<p>Subject: Public Records Act Request – Acknowledgment</p>
+<p>Dear {{ request.requester.name }},</p>
+<p>We acknowledge receipt on {{ request.receivedDate }} of your request for:</p>
+<blockquote>{{ request.description }}</blockquote>
+{% if request.range and (request.range.start or request.range.end) %}
+<p>for the period {{ request.range.start or '—' }} to {{ request.range.end or '—' }}.</p>
+{% endif %}
+<p>We will determine, within the time required by law, whether the request seeks disclosable records and will notify you on or before <strong>{{ timeline.determinationDue }}</strong>.</p>
+<p>Sincerely,<br>{{ agency.signatureBlock if agency else 'Agency Staff' }}</p>
