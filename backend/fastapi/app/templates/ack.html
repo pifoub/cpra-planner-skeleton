@@ -2,7 +2,7 @@
 <p>Subject: Public Records Act Request – Acknowledgment</p>
 <p>Dear {{ request.requester.name }},</p>
 <p>We acknowledge receipt on {{ request.receivedDate }} of your request for:</p>
-<blockquote>{{ request.description }}</blockquote>
+<blockquote>{{ request.description | nl2br }}</blockquote>
 {% if request.range and (request.range.start or request.range.end) %}
 <p>for the period {{ request.range.start or '—' }} to {{ request.range.end or '—' }}.</p>
 {% endif %}
