@@ -1,7 +1,12 @@
+// Tests for scope extraction from meeting notes.
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { extractScope } from '../src/services/extractor.js';
 
+/**
+ * extractor.parseScope should convert notes into structured request data.
+ */
 test('extractScope parses notes', () => {
   const notes =
     'Meeting notes from John Doe <john.doe@example.com> on 2025-01-05. Records sought: Budget documents.';
