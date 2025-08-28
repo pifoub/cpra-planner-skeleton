@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers.cpra import router as cpra_router
 
-app = FastAPI(title="CPRA Planner API")
+# Include an explicit API version so generated OpenAPI specs are stable
+app = FastAPI(title="CPRA Planner API", version="0.0.1")
 
 app.add_middleware(
     CORSMiddleware,

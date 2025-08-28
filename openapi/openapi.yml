@@ -1,2 +1,311 @@
-openapi: 3.0.3
-info: { title: CPRA Response Planner API, version: 0.0.1 }
+openapi: 3.1.0
+info:
+  title: CPRA Planner API
+  version: 0.0.1
+paths:
+  /api/extract/scope:
+    post:
+      tags:
+      - cpra
+      summary: Extract Scope Api
+      operationId: extract_scope_api_api_extract_scope_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties:
+                type: string
+              type: object
+              title: Payload
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CPRARequestDraft'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/timeline/calc:
+    post:
+      tags:
+      - cpra
+      summary: Timeline Calc Api
+      operationId: timeline_calc_api_api_timeline_calc_post
+      parameters:
+      - name: adjustForHolidays
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: true
+          title: Adjustforholidays
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CPRARequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Timeline'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/letters/ack:
+    post:
+      tags:
+      - cpra
+      summary: Letters Ack Api
+      operationId: letters_ack_api_api_letters_ack_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Data
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LetterArtifact'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/letters/extension:
+    post:
+      tags:
+      - cpra
+      summary: Letters Ext Api
+      operationId: letters_ext_api_api_letters_extension_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Data
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LetterArtifact'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/tasks/sync:
+    post:
+      tags:
+      - cpra
+      summary: Tasks Sync Api
+      operationId: tasks_sync_api_api_tasks_sync_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Data
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    CPRARequest:
+      properties:
+        requester:
+          $ref: '#/components/schemas/Requester'
+        receivedDate:
+          type: string
+          title: Receiveddate
+        description:
+          type: string
+          title: Description
+        range:
+          anyOf:
+          - $ref: '#/components/schemas/DateRange'
+          - type: 'null'
+        departments:
+          items:
+            type: string
+          type: array
+          title: Departments
+        extension:
+          $ref: '#/components/schemas/Extension'
+      type: object
+      required:
+      - requester
+      - receivedDate
+      - description
+      title: CPRARequest
+    CPRARequestDraft:
+      properties:
+        request:
+          $ref: '#/components/schemas/CPRARequest'
+        confidences:
+          additionalProperties:
+            type: number
+          type: object
+          title: Confidences
+      type: object
+      required:
+      - request
+      title: CPRARequestDraft
+    DateRange:
+      properties:
+        start:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Start
+        end:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: End
+      type: object
+      title: DateRange
+    Extension:
+      properties:
+        apply:
+          type: boolean
+          title: Apply
+          default: false
+        reasons:
+          items:
+            type: string
+          type: array
+          title: Reasons
+      type: object
+      title: Extension
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    LetterArtifact:
+      properties:
+        html:
+          type: string
+          title: Html
+        docxBase64:
+          type: string
+          title: Docxbase64
+          default: ''
+        pdfBase64:
+          type: string
+          title: Pdfbase64
+          default: ''
+      type: object
+      required:
+      - html
+      title: LetterArtifact
+    Requester:
+      properties:
+        name:
+          type: string
+          title: Name
+        org:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Org
+        email:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Email
+      type: object
+      required:
+      - name
+      title: Requester
+    Timeline:
+      properties:
+        determinationDue:
+          type: string
+          title: Determinationdue
+        extensionDue:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Extensiondue
+        milestones:
+          items:
+            $ref: '#/components/schemas/TimelineItem'
+          type: array
+          title: Milestones
+      type: object
+      required:
+      - determinationDue
+      title: Timeline
+    TimelineItem:
+      properties:
+        label:
+          type: string
+          title: Label
+        due:
+          type: string
+          title: Due
+      type: object
+      required:
+      - label
+      - due
+      title: TimelineItem
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
