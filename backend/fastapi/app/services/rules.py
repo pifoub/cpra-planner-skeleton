@@ -33,11 +33,15 @@ def to_date(s: str) -> date:
         raise HTTPException(status_code=400, detail=f"Unrecognized date format: {s}")
 
 def roll_forward(d: date) -> date:
-    if d.weekday() == 5: return d + timedelta(days=2) # Sat->Mon
-    if d.weekday() == 6: return d + timedelta(days=1) # Sun->Mon
+    """Move weekend dates forward to the next Monday."""
+    if d.weekday() == 5:
+        return d + timedelta(days=2)  # Sat->Mon
+    if d.weekday() == 6:
+        return d + timedelta(days=1)  # Sun->Mon
     return d
 
 def compute_timeline(req: CPRARequest, adjust_for_holidays: bool=True) -> Timeline:
+    """Calculate statutory deadlines and milestone dates for a request."""
     received = to_date(req.receivedDate)
     determination = received + timedelta(days=10)
     extension_due = None
@@ -45,11 +49,16 @@ def compute_timeline(req: CPRARequest, adjust_for_holidays: bool=True) -> Timeli
         extension_due = determination + timedelta(days=14)
     if adjust_for_holidays:
         determination = roll_forward(determination)
-        if extension_due: extension_due = roll_forward(extension_due)
+        if extension_due:
+            extension_due = roll_forward(extension_due)
     prod_base = extension_due or determination
     milestones = [
         TimelineItem(label="Search kickoff", due=str(roll_forward(received + timedelta(days=1)))),
         TimelineItem(label="Privilege review", due=str(roll_forward(prod_base - timedelta(days=3)))),
         TimelineItem(label="Draft production", due=str(roll_forward(prod_base - timedelta(days=1)))),
     ]
-    return Timeline(determinationDue=str(determination), extensionDue=(str(extension_due) if extension_due else None), milestones=milestones)
+    return Timeline(
+        determinationDue=str(determination),
+        extensionDue=(str(extension_due) if extension_due else None),
+        milestones=milestones,
+    )

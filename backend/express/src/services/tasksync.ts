@@ -1,11 +1,13 @@
 import { randomUUID } from 'crypto';
 
+/** Generate a minimal ICS `VEVENT` block. */
 function icsEvent(dtstart_date: string, summary: string, uid?: string, description = ''): string {
   const id = uid || randomUUID();
   const dtstamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   return `BEGIN:VEVENT\nUID:${id}\nDTSTAMP:${dtstamp}\nDTSTART;VALUE=DATE:${dtstart_date.replace(/-/g,'')}\nSUMMARY:${summary}\nDESCRIPTION:${description}\nEND:VEVENT`;
 }
 
+/** Create calendar events from a timeline and return an ICS file. */
 export function createTaskSync(payload: any) {
   const tl = payload.timeline || {};
   const events: string[] = [];

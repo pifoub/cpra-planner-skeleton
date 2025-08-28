@@ -3,16 +3,19 @@ import type { CPRARequest, CPRARequestDraft, Requester } from './types.js';
 const EMAIL_RE = /[\w\.-]+@[\w\.-]+/;
 const DATE_RE = /(\b\d{4}-\d{2}-\d{2}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}\b)/i;
 
+/** Return the first email address found in `text` or `null`. */
 function firstEmail(text: string): string | null {
   const m = text.match(EMAIL_RE);
   return m ? m[0] : null;
 }
 
+/** Return the first date-like string found in `text` or `null`. */
 function firstDate(text: string): string | null {
   const m = text.match(DATE_RE);
   return m ? m[0] : null;
 }
 
+/** Derive a draft CPRA request from free-form meeting notes. */
 export function extractScope(notes: string): CPRARequestDraft {
   const email = firstEmail(notes) || 'requester@example.com';
   let name = 'Unknown Requester';
@@ -29,7 +32,7 @@ export function extractScope(notes: string): CPRARequestDraft {
     description: desc,
     range: {},
     departments: [],
-    extension: { apply: false, reasons: [] }
+    extension: { apply: false, reasons: [] },
   };
   return { request: draft, confidences: { requester: 0.6, receivedDate: 0.7, description: 0.6 } };
 }

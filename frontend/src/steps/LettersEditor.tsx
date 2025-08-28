@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { postJSON } from '../lib/api';
 import type { CPRARequest, Timeline, LetterKind } from '../types';
 
+/** Step for previewing acknowledgment or extension letters. */
 export default function LettersEditor({
   req,
   tl,

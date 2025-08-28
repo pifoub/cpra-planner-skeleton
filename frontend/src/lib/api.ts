@@ -1,3 +1,7 @@
+/**
+ * POST JSON to the given URL and return the parsed response.
+ * Throws an Error when the request fails.
+ */
 export async function postJSON(url: string, body: any) {
   try {
     const r = await fetch(url, {

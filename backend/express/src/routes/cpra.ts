@@ -6,6 +6,7 @@ import { createTaskSync } from '../services/tasksync.js';
 
 const r = Router();
 
+/** Extract a draft CPRA scope from meeting notes. */
 r.post('/extract/scope', (req, res) => {
   const notes = req.body?.notes;
   if (typeof notes !== 'string') {
@@ -14,6 +15,7 @@ r.post('/extract/scope', (req, res) => {
   return res.json(extractScope(notes));
 });
 
+/** Calculate statutory deadlines and milestones for a request. */
 r.post('/timeline/calc', (req, res) => {
   const adjust = req.query.adjustForHolidays !== 'false';
   try {
@@ -24,6 +26,7 @@ r.post('/timeline/calc', (req, res) => {
   }
 });
 
+/** Render an acknowledgement letter. */
 r.post('/letters/ack', (req, res) => {
   try {
     const html = renderLetter('ack.html', req.body);
@@ -33,6 +36,7 @@ r.post('/letters/ack', (req, res) => {
   }
 });
 
+/** Render an extension letter. */
 r.post('/letters/extension', (req, res) => {
   try {
     const html = renderLetter('extension.html', req.body);
@@ -42,6 +46,7 @@ r.post('/letters/extension', (req, res) => {
   }
 });
 
+/** Create calendar events and return an ICS file. */
 r.post('/tasks/sync', (req, res) => {
   try {
     return res.json(createTaskSync(req.body));
