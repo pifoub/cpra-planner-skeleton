@@ -1,3 +1,5 @@
+// Tests for converting timelines into calendar events.
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createTaskSync } from '../src/services/tasksync.js';
@@ -10,6 +12,9 @@ const payload = {
   },
 };
 
+/**
+ * createTaskSync should include all relevant events in the ICS payload.
+ */
 test('createTaskSync builds ICS with events', () => {
   const result = createTaskSync(payload);
   const ics = Buffer.from(result.icsFileBase64, 'base64').toString();

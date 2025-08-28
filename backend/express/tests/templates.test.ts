@@ -1,7 +1,12 @@
+// Tests for the template rendering service.
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { renderLetter } from '../src/services/templates.js';
 
+/**
+ * The acknowledgment template should convert newlines to <br> tags.
+ */
 test('renderLetter applies nl2br filter', () => {
   const context = {
     request: {

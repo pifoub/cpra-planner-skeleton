@@ -1,9 +1,12 @@
+"""Tests for the task synchronization service."""
+
 from base64 import b64decode
 
 from app.services.tasksync import create_task_sync
 
 
 def test_create_task_sync_generates_events():
+    """create_task_sync builds an ICS file with expected event names."""
     payload = {
         "timeline": {
             "determinationDue": "2025-01-27",
