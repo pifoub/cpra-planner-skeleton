@@ -7,6 +7,7 @@ import LettersEditor from './steps/LettersEditor'
 import TasksAndChecklist from './steps/TasksAndChecklist'
 import type { CPRARequest, Timeline } from './types'
 
+/** Root application component orchestrating the workflow steps. */
 export default function App(){
   const [step,setStep]=useState(0)
   const [req,setReq]=useState<CPRARequest|null>(null)

@@ -1,5 +1,6 @@
 import type { CPRARequest, Timeline, TimelineItem } from './types.js';
 
+/** Convert a string to a `Date`, accepting ISO or US formats. */
 function toDate(s: string): Date {
   const iso = new Date(s);
   if (!isNaN(iso.getTime())) return new Date(iso.getFullYear(), iso.getMonth(), iso.getDate());
@@ -17,6 +18,7 @@ function toDate(s: string): Date {
   throw new Error(`Unrecognized date format: ${s}`);
 }
 
+/** Move weekend dates forward to the next Monday. */
 function rollForward(d: Date): Date {
   const day = d.getDay();
   if (day === 6) return new Date(d.getTime() + 2 * 86400000);
@@ -24,10 +26,12 @@ function rollForward(d: Date): Date {
   return d;
 }
 
+/** Format a `Date` as `YYYY-MM-DD`. */
 function fmt(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** Calculate statutory deadlines and milestone dates for a request. */
 export function computeTimeline(req: CPRARequest, adjustForHolidays = true): Timeline {
   if (!req || !req.requester || !req.receivedDate || !req.description) {
     throw new Error('Invalid CPRARequest');

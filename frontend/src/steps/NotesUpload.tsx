@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { postJSON } from '../lib/api';
 import type { CPRARequest } from '../types';
 
+/** Step for uploading notes and extracting a draft scope. */
 export default function NotesUpload({
   onExtract,
 }: {
@@ -12,6 +13,7 @@ export default function NotesUpload({
   );
   const [error, setError] = useState<string | null>(null);
 
+  /** Call the backend to extract a CPRA scope from notes. */
   async function extract() {
     try {
       const res = await postJSON('/api/extract/scope', { notes });

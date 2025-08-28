@@ -3,6 +3,7 @@ import Card from '../components/Card';
 import { postJSON } from '../lib/api';
 import type { CPRARequest, Timeline } from '../types';
 
+/** Display the computed timeline for approval. */
 export default function TimelineView({
   req,
   onApprove,
