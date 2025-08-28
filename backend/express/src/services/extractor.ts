@@ -1,0 +1,35 @@
+import type { CPRARequest, CPRARequestDraft, Requester } from './types.js';
+
+const EMAIL_RE = /[\w\.-]+@[\w\.-]+/;
+const DATE_RE = /(\b\d{4}-\d{2}-\d{2}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}\b)/i;
+
+function firstEmail(text: string): string | null {
+  const m = text.match(EMAIL_RE);
+  return m ? m[0] : null;
+}
+
+function firstDate(text: string): string | null {
+  const m = text.match(DATE_RE);
+  return m ? m[0] : null;
+}
+
+export function extractScope(notes: string): CPRARequestDraft {
+  const email = firstEmail(notes) || 'requester@example.com';
+  let name = 'Unknown Requester';
+  const nameMatch = notes.match(/(?:from|by|request(?:or|ed) by)[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i);
+  if (nameMatch) name = nameMatch[1];
+  const received = firstDate(notes) || '2025-01-01';
+  let desc = 'All emails related to agenda item';
+  const descMatch = notes.match(/(?:request|records sought)[:\s]+(.+)/i);
+  if (descMatch) desc = descMatch[1].trim();
+  const requester: Requester = { name, email };
+  const draft: CPRARequest = {
+    requester,
+    receivedDate: received,
+    description: desc,
+    range: {},
+    departments: [],
+    extension: { apply: false, reasons: [] }
+  };
+  return { request: draft, confidences: { requester: 0.6, receivedDate: 0.7, description: 0.6 } };
+}
