@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional, Dict
 
 class Requester(BaseModel):
@@ -13,15 +13,15 @@ class DateRange(BaseModel):
 
 class Extension(BaseModel):
     apply: bool = False
-    reasons: List[str] = []
+    reasons: List[str] = Field(default_factory=list)
 
 class CPRARequest(BaseModel):
     requester: Requester
     receivedDate: str
     description: str
     range: Optional[DateRange] = None
-    departments: List[str] = []
-    extension: Extension = Extension()
+    departments: List[str] = Field(default_factory=list)
+    extension: Extension = Field(default_factory=Extension)
 
 class TimelineItem(BaseModel):
     label: str
@@ -30,11 +30,11 @@ class TimelineItem(BaseModel):
 class Timeline(BaseModel):
     determinationDue: str
     extensionDue: Optional[str] = None
-    milestones: List[TimelineItem] = []
+    milestones: List[TimelineItem] = Field(default_factory=list)
 
 class CPRARequestDraft(BaseModel):
     request: CPRARequest
-    confidences: Dict[str, float] = {}
+    confidences: Dict[str, float] = Field(default_factory=dict)
 
 class LetterArtifact(BaseModel):
     html: str
