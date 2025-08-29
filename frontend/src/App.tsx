@@ -6,7 +6,7 @@ import ScopeForm from './steps/ScopeForm';
 import TimelineView from './steps/TimelineView';
 import LettersEditor from './steps/LettersEditor';
 import TasksAndChecklist from './steps/TasksAndChecklist';
-import type { CPRARequest, Timeline } from './types';
+import type { CPRARequest, Timeline, LetterKind } from './types';
 import { SAMPLE_NOTES } from './sampleNotes';
 
 /** Root application component orchestrating the workflow steps. */
@@ -63,6 +63,7 @@ export default function App() {
       const result = await nextRef.current();
       let action: 'accept' | 'edit' = 'accept';
       let editedSample = false;
+      let letterKind: LetterKind | undefined;
       switch (step) {
         case 0:
           setReq(result);
@@ -79,11 +80,14 @@ export default function App() {
           break;
         case 3:
           action = result.edited ? 'edit' : 'accept';
+          letterKind = result.kind;
           break;
       }
       const ms = Date.now() - startRef.current;
       if (step === 0) {
         console.log(`Notes step: ${ms}ms, editedSample=${editedSample}`);
+      } else if (step === 3) {
+        console.log(`Step ${steps[step]} (${letterKind}): ${action} in ${ms}ms`);
       } else {
         console.log(`Step ${steps[step]}: ${action} in ${ms}ms`);
       }
