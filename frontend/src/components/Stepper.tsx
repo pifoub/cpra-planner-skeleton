@@ -8,6 +8,7 @@ export default function Stepper({
   onNext,
   disableBack,
   disableNext,
+  nextLabel = 'Next',
 }: {
   current: number;
   labels: string[];
@@ -15,6 +16,7 @@ export default function Stepper({
   onNext: () => void;
   disableBack?: boolean;
   disableNext?: boolean;
+  nextLabel?: string;
 }) {
   return (
     <div className='flex items-center justify-between'>
@@ -24,7 +26,7 @@ export default function Stepper({
           Back
         </button>
         <button className='btn-primary' onClick={onNext} disabled={disableNext}>
-          Next
+          {nextLabel}
         </button>
       </div>
     </div>
