@@ -23,49 +23,50 @@ export default function NotesUpload({
 
   const [preview, setPreview] = useState<Preview | null>(null);
 
-  /**
-   * Very small client-side parser to simulate extraction. Looks for patterns
-   * like "request by NAME <email> on YYYY-MM-DD" and "Records sought: ...".
-   */
-  function simulateExtraction(text: string): Preview {
-    const nameMatch = text.match(/request by ([^<\n]+)</i);
-    const dateMatch = text.match(/on (\d{4}-\d{2}-\d{2})/);
-    const descMatch = text.match(/records sought:([^\.]+)/i);
-    return {
-      requester: nameMatch ? nameMatch[1].trim() : null,
-      received: dateMatch ? dateMatch[1] : null,
-      description: descMatch ? descMatch[1].trim() : null,
-      conf: {
-        requester: nameMatch ? 0.9 : 0.2,
-        received: dateMatch ? 0.9 : 0.2,
-        description: descMatch ? 0.9 : 0.2,
-      },
-    };
+  type ExtractResp = {
+    request: CPRARequest;
+    confidences: { requester: number; receivedDate: number; description: number };
+  };
+
+  async function runExtraction(text: string): Promise<ExtractResp> {
+    const res = await fetch('/api/extract/scope', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notes: text }),
+    });
+    if (!res.ok) throw new Error('extract failed');
+    return res.json();
   }
 
   /** Load preview whenever notes change. */
   useEffect(() => {
     if (notes.trim().length > 0) {
-      setPreview(simulateExtraction(notes));
+      runExtraction(notes)
+        .then(data => {
+          setPreview({
+            requester: data.request.requester.name || null,
+            received: data.request.receivedDate || null,
+            description: data.request.description || null,
+            conf: {
+              requester: data.confidences.requester,
+              received: data.confidences.receivedDate,
+              description: data.confidences.description,
+            },
+          });
+        })
+        .catch(() => setPreview(null));
     } else {
       setPreview(null);
     }
     registerNext(extract, notes.trim().length > 0);
   }, [notes, registerNext]);
 
-  /** Simulated extraction returning a CPRARequest object. */
+  /** Extraction returning a CPRARequest object. */
   async function extract() {
     try {
-      const p = simulateExtraction(notes);
+      const data = await runExtraction(notes);
       setError(null);
-      return {
-        requester: { name: p.requester ?? '' },
-        receivedDate: p.received ?? '',
-        description: p.description ?? '',
-        range: {},
-        departments: [],
-        extension: { apply: false, reasons: [] },
-      } as CPRARequest;
+      return data.request;
     } catch (e) {
       console.error(e);
       setError('Failed to extract scope');

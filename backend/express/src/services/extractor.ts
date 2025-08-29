@@ -12,18 +12,21 @@ function firstEmail(text: string): string | null {
 /** Return the first date-like string found in `text` or `null`. */
 function firstDate(text: string): string | null {
   const m = text.match(DATE_RE);
-  return m ? m[0] : null;
+  if (!m) return null;
+  const raw = m[0];
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? raw : d.toISOString().slice(0, 10);
 }
 
 /** Derive a draft CPRA request from free-form meeting notes. */
 export function extractScope(notes: string): CPRARequestDraft {
   const email = firstEmail(notes) || 'requester@example.com';
   let name = 'Unknown Requester';
-  const nameMatch = notes.match(/(?:from|by|request(?:or|ed) by)[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i);
+  const nameMatch = notes.match(/(?:from|by|request(?:or|ed) by|requester)[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i);
   if (nameMatch) name = nameMatch[1];
   const received = firstDate(notes) || '2025-01-01';
   let desc = 'All emails related to agenda item';
-  const descMatch = notes.match(/(?:request|records sought)[:\s]+(.+)/i);
+  const descMatch = notes.match(/(?:request|records sought|subject)[:\s]+(.+)/i);
   if (descMatch) desc = descMatch[1].trim();
   const requester: Requester = { name, email };
   const draft: CPRARequest = {
