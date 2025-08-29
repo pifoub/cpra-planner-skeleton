@@ -148,6 +148,7 @@ export default function App() {
           onNext={handleNext}
           disableBack={step === 0}
           disableNext={!canNext || step === steps.length - 1}
+          nextLabel={step === 1 ? 'Approve' : 'Next'}
         />
       </footer>
     </div>
