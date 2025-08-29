@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Timeline } from '../types';
-import { postJSON } from '../lib/api';
+import Card from '../components/Card';
 
 const REDACTION_ITEMS = [
   'Attorney–client / work product',
@@ -18,26 +18,48 @@ const REDACTION_ITEMS = [
 
 /** Checklist for redaction and task synchronization step. */
 export default function TasksAndChecklist({
-  matterId,
-  tl,
-  recipients,
+  matterId: _matterId,
+  tl: _tl,
+  recipients: _recipients,
 }: {
   matterId: string;
   tl: Timeline;
   recipients: string[];
 }) {
-  const [checked, setChecked] = useState(REDACTION_ITEMS.map(() => false));
+  const [items, setItems] = useState(
+    REDACTION_ITEMS.map(() => ({ checked: false, timestamp: null as string | null }))
+  );
   const [ics, setIcs] = useState<string | null>(null);
+  const [preview, setPreview] = useState<
+    { summary: string; start: string; end: string } | null
+  >(null);
 
-  /** Call backend to create events and retrieve an ICS file. */
-  async function sync() {
-    const res = await postJSON('/api/tasks/sync', {
-      matterId,
-      timeline: tl,
-      assignees: [],
-      email: { send: false, to: recipients },
+  /** Demo-only action generating a sample ICS file and preview. */
+  function generateIcs() {
+    const sampleEvent = {
+      summary: 'Demo Event',
+      start: '2023-01-02T09:00:00Z',
+      end: '2023-01-02T10:00:00Z',
+    };
+    const start = sampleEvent.start.replace(/[-:]/g, '').replace('.000Z', 'Z');
+    const end = sampleEvent.end.replace(/[-:]/g, '').replace('.000Z', 'Z');
+    const sampleIcs = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//CPRA Demo//EN
+BEGIN:VEVENT
+UID:demo-1
+DTSTAMP:20230101T000000Z
+SUMMARY:${sampleEvent.summary}
+DTSTART:${start}
+DTEND:${end}
+END:VEVENT
+END:VCALENDAR`;
+    setIcs(btoa(sampleIcs));
+    setPreview({
+      summary: sampleEvent.summary,
+      start: new Date(sampleEvent.start).toLocaleString(),
+      end: new Date(sampleEvent.end).toLocaleString(),
     });
-    setIcs(res.icsFileBase64);
   }
 
   return (
@@ -49,26 +71,45 @@ export default function TasksAndChecklist({
             <li key={i} className='flex items-center gap-2'>
               <input
                 type='checkbox'
-                checked={checked[i]}
+                checked={items[i].checked}
                 onChange={() =>
-                  setChecked(prev => prev.map((v, idx) => (idx === i ? !v : v)))
+                  setItems(prev =>
+                    prev.map((v, idx) =>
+                      idx === i
+                        ? {
+                            checked: !v.checked,
+                            timestamp: !v.checked
+                              ? new Date().toLocaleString()
+                              : null,
+                          }
+                        : v
+                    )
+                  )
                 }
               />
               <span>{item}</span>
+              {items[i].timestamp && (
+                <span className='text-xs text-gray-500'>
+                  ({items[i].timestamp})
+                </span>
+              )}
             </li>
           ))}
         </ul>
+        <div className='mt-4 p-2 bg-blue-50 text-blue-800 text-sm text-center'>
+          In production this will sync to Google/Microsoft.
+        </div>
       </div>
       <div>
         <h2 className='font-semibold mb-2'>Task Sync</h2>
         <p className='text-sm text-gray-600 mb-2'>
           Creates calendar holds and returns an ICS file you can import.
         </p>
-        <button className='btn-primary' onClick={sync}>
-          Create Events & Get ICS
+        <button className='btn-primary' onClick={generateIcs}>
+          Generate ICS
         </button>
         {ics && (
-          <div className='mt-3'>
+          <div className='mt-3 space-y-3'>
             <a
               download='cpra_events.ics'
               href={`data:text/calendar;base64,${ics}`}
@@ -76,6 +117,12 @@ export default function TasksAndChecklist({
             >
               Download ICS
             </a>
+            {preview && (
+              <Card
+                title={preview.summary}
+                value={`${preview.start} – ${preview.end}`}
+              />
+            )}
           </div>
         )}
       </div>
