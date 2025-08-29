@@ -1,4 +1,6 @@
 
+"""Application factory for the CPRA planner FastAPI service."""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers.cpra import router as cpra_router
