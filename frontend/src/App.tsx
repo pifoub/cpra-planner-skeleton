@@ -46,7 +46,7 @@ export default function App() {
   const [tl, setTl] = useState<Timeline | null>(null);
   const nextRef = useRef<() => Promise<any> | any>(() => {});
   const [canNext, setCanNext] = useState(true);
-  const startRef = useRef(Date.now());
+  const stepTimes = useRef<Record<number, { start: number; end?: number }>>({});
 
   function registerNext(fn: () => Promise<any> | any, ready = true) {
     nextRef.current = fn;
@@ -54,7 +54,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    startRef.current = Date.now();
+    stepTimes.current[step] = { start: Date.now() };
   }, [step]);
 
   async function handleNext() {
@@ -71,25 +71,28 @@ export default function App() {
           action = editedSample ? 'edit' : 'accept';
           break;
         case 1:
-          action = JSON.stringify(result) === JSON.stringify(req) ? 'accept' : 'edit';
-          setReq(result);
+          action = result.edited ? 'edit' : 'accept';
+          setReq(result.data);
           break;
         case 2:
-          setTl(result);
-          action = 'accept';
+          action = result.edited ? 'edit' : 'accept';
+          setTl(result.timeline);
           break;
         case 3:
           action = result.edited ? 'edit' : 'accept';
           letterKind = result.kind;
           break;
       }
-      const ms = Date.now() - startRef.current;
+      const end = Date.now();
+      const start = stepTimes.current[step]?.start ?? end;
+      stepTimes.current[step].end = end;
+      const ms = end - start;
       if (step === 0) {
-        console.log(`Notes step: ${ms}ms, editedSample=${editedSample}`);
+        console.log(`Step ${steps[step]}: ${action}`, { start, end, ms, editedSample });
       } else if (step === 3) {
-        console.log(`Step ${steps[step]} (${letterKind}): ${action} in ${ms}ms`);
+        console.log(`Step ${steps[step]} (${letterKind}): ${action}`, { start, end, ms });
       } else {
-        console.log(`Step ${steps[step]}: ${action} in ${ms}ms`);
+        console.log(`Step ${steps[step]}: ${action}`, { start, end, ms });
       }
       setStep(s => s + 1);
     } catch (e) {
@@ -99,10 +102,17 @@ export default function App() {
 
   function handleBack() {
     if (step === 0) return;
+    const end = Date.now();
+    const start = stepTimes.current[step]?.start ?? end;
+    stepTimes.current[step].end = end;
+    console.log(`Step ${steps[step]}: back`, { start, end, ms: end - start });
     setStep(s => s - 1);
   }
 
   function resetDemo() {
+    const end = Date.now();
+    const start = stepTimes.current[step]?.start ?? end;
+    console.log(`Abandoned at step ${steps[step]} after ${end - start}ms`);
     setNotes('');
     setReq(null);
     setTl(null);
@@ -112,6 +122,18 @@ export default function App() {
   function loadSample() {
     setNotes(SAMPLE_NOTES);
   }
+
+  useEffect(() => {
+    const handleUnload = () => {
+      if (step < steps.length - 1) {
+        const end = Date.now();
+        const start = stepTimes.current[step]?.start ?? end;
+        console.log(`Abandoned at step ${steps[step]} after ${end - start}ms`);
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [step, steps.length]);
 
   return (
     <div className='max-w-5xl mx-auto p-6'>
