@@ -9,7 +9,7 @@ export default function ScopeForm({
   registerNext,
 }: {
   draft: CPRARequest;
-  registerNext: (fn: () => CPRARequest, ready?: boolean) => void;
+  registerNext: (fn: () => { data: CPRARequest; edited: boolean }, ready?: boolean) => void;
 }) {
   const [f, setF] = useState<CPRARequest>(draft);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -64,8 +64,9 @@ export default function ScopeForm({
 
   useEffect(() => {
     const valid = Object.values(errors).every(e => !e);
-    registerNext(() => f, valid);
-  }, [f, errors, registerNext]);
+    const edited = JSON.stringify(f) !== JSON.stringify(draft);
+    registerNext(() => ({ data: f, edited }), valid);
+  }, [f, errors, registerNext, draft]);
 
   const confirmedCount = [
     f.requester.name,

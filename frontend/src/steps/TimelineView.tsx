@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Card from '../components/Card';
 import type { CPRARequest, Timeline } from '../types';
 import { computeTimeline, DateMath } from '../lib/timeline';
@@ -9,10 +9,14 @@ export default function TimelineView({
   registerNext,
 }: {
   req: CPRARequest;
-  registerNext: (fn: () => Timeline, ready?: boolean) => void;
+  registerNext: (fn: () => { timeline: Timeline; edited: boolean }, ready?: boolean) => void;
 }) {
-  const [applyExt, setApplyExt] = useState(req.extension?.apply ?? false);
-  const [adjustWeekends, setAdjustWeekends] = useState(true);
+  const initial = useRef({
+    applyExt: req.extension?.apply ?? false,
+    adjustWeekends: true,
+  });
+  const [applyExt, setApplyExt] = useState(initial.current.applyExt);
+  const [adjustWeekends, setAdjustWeekends] = useState(initial.current.adjustWeekends);
   const [tl, setTl] = useState<Timeline | null>(null);
   const [math, setMath] = useState<DateMath | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +37,11 @@ export default function TimelineView({
   }, [req, applyExt, adjustWeekends]);
 
   useEffect(() => {
-    registerNext(() => tl!, !!tl);
-  }, [tl, registerNext]);
+    const edited =
+      applyExt !== initial.current.applyExt ||
+      adjustWeekends !== initial.current.adjustWeekends;
+    registerNext(() => ({ timeline: tl!, edited }), !!tl);
+  }, [tl, registerNext, applyExt, adjustWeekends]);
 
   if (error) return <div className='text-red-600'>{error}</div>;
   if (!tl || !math) return <div>Calculating...</div>;
