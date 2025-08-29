@@ -6,10 +6,10 @@ import type { CPRARequest, Timeline } from '../types';
 /** Display the computed timeline for approval. */
 export default function TimelineView({
   req,
-  onApprove,
+  registerNext,
 }: {
   req: CPRARequest;
-  onApprove: (t: Timeline) => void;
+  registerNext: (fn: () => Timeline, ready?: boolean) => void;
 }) {
   const [tl, setTl] = useState<Timeline | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +26,10 @@ export default function TimelineView({
     })();
   }, [req]);
 
+  useEffect(() => {
+    registerNext(() => tl!, !!tl);
+  }, [tl, registerNext]);
+
   if (error) return <div className='text-red-600'>{error}</div>;
   if (!tl) return <div>Calculating...</div>;
 
@@ -38,11 +42,7 @@ export default function TimelineView({
         {tl.extensionDue && <Card title='Extension Due' value={tl.extensionDue} />}
         <Card title='Draft Production' value={draftProd} />
       </div>
-      <div className='flex justify-end'>
-        <button className='btn-primary' onClick={() => onApprove(tl)}>
-          Approve Timeline
-        </button>
-      </div>
+      {/* Primary action moved to Stepper */}
     </div>
   );
 }

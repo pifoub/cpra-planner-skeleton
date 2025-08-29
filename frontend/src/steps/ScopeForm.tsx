@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CPRARequest } from '../types';
 
 /**
@@ -6,10 +6,10 @@ import type { CPRARequest } from '../types';
  */
 export default function ScopeForm({
   draft,
-  onApprove,
+  registerNext,
 }: {
   draft: CPRARequest;
-  onApprove: (r: CPRARequest) => void;
+  registerNext: (fn: () => CPRARequest) => void;
 }) {
   const [f, setF] = useState<CPRARequest>(draft);
 
@@ -26,6 +26,10 @@ export default function ScopeForm({
       return c;
     });
   }
+
+  useEffect(() => {
+    registerNext(() => f);
+  }, [f, registerNext]);
 
   return (
     <div className='grid grid-cols-2 gap-4'>
@@ -102,11 +106,7 @@ export default function ScopeForm({
           onChange={e => up('extension.apply', e.target.checked)}
         />
       </div>
-      <div className='col-span-2 flex justify-end'>
-        <button className='btn-primary' onClick={() => onApprove(f)}>
-          Approve Scope
-        </button>
-      </div>
+      {/* Primary action moved to Stepper */}
     </div>
   );
 }
