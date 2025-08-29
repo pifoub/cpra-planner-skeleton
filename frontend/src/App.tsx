@@ -22,6 +22,8 @@ export default function App() {
       does: 'Review and edit the extracted scope.',
       ai: 'Drafts request details from the notes.',
       lawyer: 'Edits fields or accepts as-is.',
+      note:
+        'Check if the date range was missed in the extraction. Range will default to: 2024-01-01 - Start / Request Date - End.',
     },
     {
       does: 'Confirm statutory timeline.',
@@ -149,7 +151,9 @@ export default function App() {
           {step === 0 && (
             <NotesUpload notes={notes} setNotes={setNotes} registerNext={registerNext} />
           )}
-          {step === 1 && req && <ScopeForm draft={req} registerNext={registerNext} />}
+          {step === 1 && req && (
+            <ScopeForm draft={req} notes={notes} registerNext={registerNext} />
+          )}
           {step === 2 && req && <TimelineView req={req} registerNext={registerNext} />}
           {step === 3 && req && tl && (
             <LettersEditor req={req} tl={tl} registerNext={registerNext} />

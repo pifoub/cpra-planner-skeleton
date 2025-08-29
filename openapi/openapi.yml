@@ -150,6 +150,9 @@ components:
         receivedDate:
           type: string
           title: Receiveddate
+        subject:
+          type: string
+          title: Subject
         description:
           type: string
           title: Description
@@ -168,6 +171,7 @@ components:
       required:
       - requester
       - receivedDate
+      - subject
       - description
       title: CPRARequest
     CPRARequestDraft:

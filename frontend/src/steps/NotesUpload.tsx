@@ -16,16 +16,17 @@ export default function NotesUpload({
 
   type Preview = {
     requester: string | null;
+    subject: string | null;
     received: string | null;
     description: string | null;
-    conf: { requester: number; received: number; description: number };
+    conf: { requester: number; subject: number; received: number; description: number };
   };
 
   const [preview, setPreview] = useState<Preview | null>(null);
 
   type ExtractResp = {
     request: CPRARequest;
-    confidences: { requester: number; receivedDate: number; description: number };
+    confidences: { requester: number; subject: number; receivedDate: number; description: number };
   };
 
   async function runExtraction(text: string): Promise<ExtractResp> {
@@ -45,10 +46,12 @@ export default function NotesUpload({
         .then(data => {
           setPreview({
             requester: data.request.requester.name || null,
+            subject: data.request.subject || null,
             received: data.request.receivedDate || null,
             description: data.request.description || null,
             conf: {
               requester: data.confidences.requester,
+              subject: data.confidences.subject,
               received: data.confidences.receivedDate,
               description: data.confidences.description,
             },
@@ -122,7 +125,12 @@ export default function NotesUpload({
             <ConfidenceChip score={preview.conf.requester} />
           </p>
           <p>
-            <span className='font-medium'>Received:</span>{' '}
+            <span className='font-medium'>Subject:</span>{' '}
+            {preview.subject || <span className='text-gray-400'>N/A</span>}
+            <ConfidenceChip score={preview.conf.subject} />
+          </p>
+          <p>
+            <span className='font-medium'>Logged:</span>{' '}
             {preview.received || <span className='text-gray-400'>N/A</span>}
             <ConfidenceChip score={preview.conf.received} />
           </p>

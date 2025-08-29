@@ -38,15 +38,25 @@ def extract_scope(notes: str) -> CPRARequestDraft:
     if m:
         name = m.group(1)
     received = _first_date(notes) or "2025-01-01"
+    subject = "No subject found"
+    ms = re.search(r'subject[:\s]+(.+)', notes, re.I)
+    if ms:
+        subject = ms.group(1).strip()
     desc = "All emails related to agenda item"
-    md = re.search(r'(?:request|records sought|subject)[:\s]+(.+)', notes, re.I)
+    md = re.search(r'records sought[:\s]+(.+)', notes, re.I)
+    if not md:
+        md = re.search(r'request[:\s]+(.+)', notes, re.I)
     if md:
         desc = md.group(1).strip()
     draft = CPRARequest(
         requester=Requester(name=name, email=email),
         receivedDate=received,
+        subject=subject,
         description=desc,
-        range=DateRange(),
+        range=DateRange(start="2024-01-01", end=received),
         departments=[],
     )
-    return CPRARequestDraft(request=draft, confidences={"requester": 0.6, "receivedDate": 0.7, "description": 0.6})
+    return CPRARequestDraft(
+        request=draft,
+        confidences={"requester": 0.6, "receivedDate": 0.7, "subject": 0.6, "description": 0.6},
+    )

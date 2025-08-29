@@ -36,19 +36,22 @@ export default function TasksAndChecklist({
 
   /** Demo-only action generating a sample ICS file and preview. */
   function generateIcs() {
+    const now = new Date();
+    const later = new Date(now.getTime() + 60 * 60 * 1000);
     const sampleEvent = {
       summary: 'Demo Event',
-      start: '2023-01-02T09:00:00Z',
-      end: '2023-01-02T10:00:00Z',
+      start: now.toISOString(),
+      end: later.toISOString(),
     };
-    const start = sampleEvent.start.replace(/[-:]/g, '').replace('.000Z', 'Z');
-    const end = sampleEvent.end.replace(/[-:]/g, '').replace('.000Z', 'Z');
+    const start = sampleEvent.start.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    const end = sampleEvent.end.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    const dtstamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
     const sampleIcs = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//CPRA Demo//EN
 BEGIN:VEVENT
 UID:demo-1
-DTSTAMP:20230101T000000Z
+DTSTAMP:${dtstamp}
 SUMMARY:${sampleEvent.summary}
 DTSTART:${start}
 DTEND:${end}
@@ -57,8 +60,8 @@ END:VCALENDAR`;
     setIcs(btoa(sampleIcs));
     setPreview({
       summary: sampleEvent.summary,
-      start: new Date(sampleEvent.start).toLocaleString(),
-      end: new Date(sampleEvent.end).toLocaleString(),
+      start: now.toLocaleString(),
+      end: later.toLocaleString(),
     });
   }
 
@@ -97,7 +100,7 @@ END:VCALENDAR`;
           ))}
         </ul>
         <div className='mt-4 p-2 bg-blue-50 text-blue-800 text-sm text-center'>
-          In production this will sync to Google/Microsoft.
+          In production this will sync to Proprietary Software / Google / Microsoft.
         </div>
       </div>
       <div>

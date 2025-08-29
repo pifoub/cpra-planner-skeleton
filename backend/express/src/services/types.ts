@@ -17,6 +17,7 @@ export interface Extension {
 export interface CPRARequest {
   requester: Requester;
   receivedDate: string;
+  subject: string;
   description: string;
   range?: DateRange;
   departments: string[];

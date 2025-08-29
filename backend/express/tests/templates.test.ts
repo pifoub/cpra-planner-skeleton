@@ -12,6 +12,7 @@ test('renderLetter applies nl2br filter', () => {
     request: {
       requester: { name: 'Jane', email: 'jane@example.com' },
       receivedDate: '2025-01-01',
+      subject: 'Line1',
       description: 'Line1\nLine2',
       range: {},
       departments: [],
