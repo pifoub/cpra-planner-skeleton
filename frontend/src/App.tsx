@@ -7,6 +7,7 @@ import TimelineView from './steps/TimelineView';
 import LettersEditor from './steps/LettersEditor';
 import TasksAndChecklist from './steps/TasksAndChecklist';
 import type { CPRARequest, Timeline } from './types';
+import { SAMPLE_NOTES } from './sampleNotes';
 
 /** Root application component orchestrating the workflow steps. */
 export default function App() {
@@ -39,9 +40,6 @@ export default function App() {
     },
   ];
 
-  const SAMPLE_NOTES =
-    'Public Records Act request by Jane Rivera <jrivera@example.com> on 2025-08-10. Records sought: emails and texts regarding agenda item 4.';
-
   const [step, setStep] = useState(0);
   const [notes, setNotes] = useState('');
   const [req, setReq] = useState<CPRARequest | null>(null);
@@ -64,10 +62,12 @@ export default function App() {
     try {
       const result = await nextRef.current();
       let action: 'accept' | 'edit' = 'accept';
+      let editedSample = false;
       switch (step) {
         case 0:
           setReq(result);
-          action = notes === SAMPLE_NOTES ? 'accept' : 'edit';
+          editedSample = notes !== SAMPLE_NOTES;
+          action = editedSample ? 'edit' : 'accept';
           break;
         case 1:
           action = JSON.stringify(result) === JSON.stringify(req) ? 'accept' : 'edit';
@@ -82,7 +82,11 @@ export default function App() {
           break;
       }
       const ms = Date.now() - startRef.current;
-      console.log(`Step ${steps[step]}: ${action} in ${ms}ms`);
+      if (step === 0) {
+        console.log(`Notes step: ${ms}ms, editedSample=${editedSample}`);
+      } else {
+        console.log(`Step ${steps[step]}: ${action} in ${ms}ms`);
+      }
       setStep(s => s + 1);
     } catch (e) {
       console.error(e);
