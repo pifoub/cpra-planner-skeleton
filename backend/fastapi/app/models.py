@@ -28,6 +28,7 @@ class CPRARequest(BaseModel):
 
     requester: Requester
     receivedDate: str
+    subject: str = ""
     description: str
     range: Optional[DateRange] = None
     departments: List[str] = Field(default_factory=list)

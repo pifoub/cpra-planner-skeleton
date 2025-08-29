@@ -25,17 +25,25 @@ export function extractScope(notes: string): CPRARequestDraft {
   const nameMatch = notes.match(/(?:from|by|request(?:or|ed) by|requester)[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i);
   if (nameMatch) name = nameMatch[1];
   const received = firstDate(notes) || '2025-01-01';
+  let subject = 'No subject found';
+  const subjectMatch = notes.match(/subject[:\s]+(.+)/i);
+  if (subjectMatch) subject = subjectMatch[1].trim();
   let desc = 'All emails related to agenda item';
-  const descMatch = notes.match(/(?:request|records sought|subject)[:\s]+(.+)/i);
+  const descMatch =
+    notes.match(/records sought[:\s]+(.+)/i) || notes.match(/request[:\s]+(.+)/i);
   if (descMatch) desc = descMatch[1].trim();
   const requester: Requester = { name, email };
   const draft: CPRARequest = {
     requester,
     receivedDate: received,
+    subject,
     description: desc,
-    range: {},
+    range: { start: '2024-01-01', end: received },
     departments: [],
     extension: { apply: false, reasons: [] },
   };
-  return { request: draft, confidences: { requester: 0.6, receivedDate: 0.7, description: 0.6 } };
+  return {
+    request: draft,
+    confidences: { requester: 0.6, receivedDate: 0.7, subject: 0.6, description: 0.6 },
+  };
 }

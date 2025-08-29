@@ -6,9 +6,11 @@ import type { CPRARequest } from '../types';
  */
 export default function ScopeForm({
   draft,
+  notes,
   registerNext,
 }: {
   draft: CPRARequest;
+  notes: string;
   registerNext: (fn: () => { data: CPRARequest; edited: boolean }, ready?: boolean) => void;
 }) {
   const [f, setF] = useState<CPRARequest>(draft);
@@ -71,6 +73,7 @@ export default function ScopeForm({
   const confirmedCount = [
     f.requester.name,
     f.requester.email,
+    f.subject,
     f.receivedDate,
     f.description,
     f.range?.start,
@@ -119,7 +122,20 @@ export default function ScopeForm({
         <div className='grid grid-cols-2 gap-4'>
           <div>
             <label className='block text-sm text-gray-600'>
-              Received Date (YYYY-MM-DD)
+              Subject
+              {edited('subject') && (
+                <span className='ml-2 text-xs text-blue-600'>✎ Edited</span>
+              )}
+            </label>
+            <input
+              className='w-full border p-2'
+              value={f.subject}
+              onChange={e => handle('subject', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className='block text-sm text-gray-600'>
+              Logged Date (YYYY-MM-DD)
               {edited('receivedDate') && (
                 <span className='ml-2 text-xs text-blue-600'>✎ Edited</span>
               )}
@@ -146,6 +162,19 @@ export default function ScopeForm({
               value={f.description}
               onChange={e => handle('description', e.target.value)}
             />
+            <div className='mt-2 text-sm'>
+              <p>
+                <span className='font-medium'>Subject:</span> {f.subject || <span className='text-gray-400'>N/A</span>}
+              </p>
+              <p>
+                <span className='font-medium'>Logged:</span> {f.receivedDate}
+              </p>
+              <textarea
+                className='w-full h-40 border p-2 mt-1'
+                value={notes}
+                readOnly
+              />
+            </div>
           </div>
         </div>
       </section>

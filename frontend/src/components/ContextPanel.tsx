@@ -4,6 +4,7 @@ export type StepContext = {
   does: string;
   ai: string;
   lawyer: string;
+  note?: string;
 };
 
 /** Side panel explaining the current step. */
@@ -22,6 +23,12 @@ export default function ContextPanel({ context }: { context: StepContext }) {
         <h2 className='font-semibold'>What the lawyer decides</h2>
         <p>{context.lawyer}</p>
       </div>
+      {context.note && (
+        <div>
+          <h2 className='font-semibold'>Note</h2>
+          <p>{context.note}</p>
+        </div>
+      )}
     </div>
   );
 }
