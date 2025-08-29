@@ -31,6 +31,42 @@ npm run dev
 - Frontend at http://localhost:5173 proxies `/api/*` to FastAPI at http://localhost:8000.
 - Express backend listens on http://localhost:8080 (update `frontend/vite.config.ts` if you use it).
 
+### Run all dev servers (one command)
+From the repo root, you can run FastAPI, Express, and Vite together:
+
+```bash
+# prerequisites: Python deps installed
+pip install -r backend/fastapi/requirements.txt
+
+# then start all three (standard mode)
+npm run dev
+
+# more resilient mode (auto-restart, don’t kill others)
+npm run dev:resilient
+```
+
+This launches:
+- `FastAPI` at `http://localhost:8000`
+- `Express` at `http://localhost:8080`
+- `Vite` dev server at `http://localhost:5173` (proxies `/api/*` to FastAPI)
+
+## Build
+
+Use the root workspace scripts to build the frontend and compile the Express backend:
+
+```bash
+# from repo root
+npm install               # installs deps in workspaces (frontend, backend/express)
+npm run build             # builds frontend (Vite) and compiles Express (tsc)
+
+# or individually
+npm run build:frontend
+npm run build:express
+
+# run compiled Express
+npm -w backend/express run start
+```
+
 ## Running tests
 
 ### Backend (FastAPI)
