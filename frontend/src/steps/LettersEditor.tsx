@@ -6,14 +6,15 @@ import type { CPRARequest, Timeline, LetterKind } from '../types';
 export default function LettersEditor({
   req,
   tl,
-  onAccept,
+  registerNext,
 }: {
   req: CPRARequest;
   tl: Timeline;
-  onAccept: () => void;
+  registerNext: (fn: () => { edited: boolean }, ready?: boolean) => void;
 }) {
   const [kind, setKind] = useState<LetterKind>('ack');
   const [html, setHtml] = useState('');
+  const [initialHtml, setInitialHtml] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function LettersEditor({
           { request: req, timeline: tl, agency: { signatureBlock: 'City Clerk' } }
         );
         setHtml(data.html);
+        setInitialHtml(data.html);
         setError(null);
       } catch (e) {
         console.error(e);
@@ -31,6 +33,10 @@ export default function LettersEditor({
       }
     })();
   }, [kind, req, tl]);
+
+  useEffect(() => {
+    registerNext(() => ({ edited: html !== initialHtml }), html !== '');
+  }, [html, initialHtml, registerNext]);
 
   return (
     <div className='space-y-3'>
@@ -54,11 +60,7 @@ export default function LettersEditor({
         value={html}
         onChange={e => setHtml(e.target.value)}
       ></textarea>
-      <div className='flex justify-end'>
-        <button className='btn-primary' onClick={onAccept}>
-          Accept Letter
-        </button>
-      </div>
+      {/* Primary action moved to Stepper */}
     </div>
   );
 }
