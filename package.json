@@ -1,0 +1,23 @@
+{
+  "name": "cpra-planner-skeleton",
+  "private": true,
+  "version": "0.0.1",
+  "workspaces": [
+    "frontend",
+    "backend/express"
+  ],
+  "scripts": {
+    "build": "npm run build -w frontend && npm run build -w backend/express",
+    "build:frontend": "npm run build -w frontend",
+    "build:express": "npm run build -w backend/express",
+    "dev:frontend": "npm run dev -w frontend",
+    "dev:express": "npm run dev -w backend/express",
+    "dev:fastapi": "python -m uvicorn app.main:app --reload --app-dir backend/fastapi --port 8000",
+    "dev": "concurrently -k -n fastapi,express,frontend -c blue,magenta,green \"npm:dev:fastapi\" \"npm -w backend/express run dev\" \"npm -w frontend run dev\"",
+    "dev:resilient": "concurrently --restart-tries 3 --restart-after 2000 -n fastapi,express,frontend -c blue,magenta,green \"npm:dev:fastapi\" \"npm -w backend/express run dev\" \"npm -w frontend run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "tsx": "^4.16.0"
+  }
+}
