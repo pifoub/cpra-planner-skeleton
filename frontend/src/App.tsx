@@ -68,6 +68,7 @@ export default function App() {
       let letterKind: LetterKind | undefined;
       switch (step) {
         case 0:
+          if (!result) throw new Error('Extraction returned no data');
           setReq(result);
           editedSample = notes !== SAMPLE_NOTES;
           action = editedSample ? 'edit' : 'accept';
@@ -153,6 +154,9 @@ export default function App() {
           )}
           {step === 1 && req && (
             <ScopeForm draft={req} notes={notes} registerNext={registerNext} />
+          )}
+          {step === 1 && !req && (
+            <div className='text-red-600'>Missing request data. Please go back and retry extraction.</div>
           )}
           {step === 2 && req && <TimelineView req={req} registerNext={registerNext} />}
           {step === 3 && req && tl && (

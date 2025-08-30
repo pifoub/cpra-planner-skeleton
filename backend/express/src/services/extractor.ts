@@ -18,7 +18,10 @@ export function extractScope(notes: string): CPRARequestDraft {
   const dm = notes.match(/Date Received:\s*([^\n]+)/);
   if (dm) received = parseDate(dm[1]);
   let matter = 'No matter found';
-  const sm = notes.match(/Matter:\s*([^\n]+)/);
+  // Capture text after "Matter:" on the same line, allowing for CRLF line endings and
+  // variations in casing. This previously failed when the notes used Windows style
+  // newlines or contained extra spaces, which left the matter field unset.
+  const sm = notes.match(/Matter\s*:\s*([^\r\n]+)/i);
   if (sm) matter = sm[1].trim();
   let rangeStart: string | undefined;
   let rangeEnd: string | undefined = received;

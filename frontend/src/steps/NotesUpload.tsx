@@ -18,18 +18,17 @@ export default function NotesUpload({
     requester: string | null;
     matter: string | null;
     received: string | null;
-    description: string | null;
     recordTypes: string[];
     custodians: string[];
     preferred: string | null;
-    conf: { requester: number; matter: number; received: number; description: number };
+    conf: { requester: number; matter: number; received: number };
   };
 
   const [preview, setPreview] = useState<Preview | null>(null);
 
   type ExtractResp = {
     request: CPRARequest;
-    confidences: { requester: number; matter: number; receivedDate: number; description: number };
+    confidences: { requester: number; matter: number; receivedDate: number };
   };
 
   async function runExtraction(text: string): Promise<ExtractResp> {
@@ -51,7 +50,6 @@ export default function NotesUpload({
             requester: data.request.requester.name || null,
             matter: data.request.matter || null,
             received: data.request.receivedDate || null,
-            description: data.request.description || null,
             recordTypes: data.request.recordTypes || [],
             custodians: data.request.custodians || [],
             preferred: data.request.preferredFormatDelivery || null,
@@ -59,7 +57,6 @@ export default function NotesUpload({
               requester: data.confidences.requester,
               matter: data.confidences.matter,
               received: data.confidences.receivedDate,
-              description: data.confidences.description,
             },
           });
         })
@@ -67,8 +64,11 @@ export default function NotesUpload({
     } else {
       setPreview(null);
     }
-    registerNext(extract, notes.trim().length > 0);
-  }, [notes, registerNext]);
+  }, [notes]);
+
+  useEffect(() => {
+    registerNext(extract, !!preview);
+  }, [registerNext, preview]);
 
   /** Extraction returning a CPRARequest object. */
   async function extract() {
@@ -139,11 +139,6 @@ export default function NotesUpload({
             <span className='font-medium'>Logged:</span>{' '}
             {preview.received || <span className='text-gray-400'>N/A</span>}
             <ConfidenceChip score={preview.conf.received} />
-          </p>
-          <p>
-            <span className='font-medium'>Description:</span>{' '}
-            {preview.description || <span className='text-gray-400'>N/A</span>}
-            <ConfidenceChip score={preview.conf.description} />
           </p>
           {preview.recordTypes.length > 0 && (
             <p>

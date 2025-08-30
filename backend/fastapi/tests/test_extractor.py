@@ -26,3 +26,16 @@ def test_extract_scope_parses_summary():
     assert draft.request.preferredFormatDelivery == "Email"
     assert draft.request.range.start == "2024-01-01"
     assert draft.request.range.end == "2025-01-05"
+
+
+def test_extract_scope_handles_crlf():
+    """Matter line should parse with CRLF endings."""
+    notes = (
+        "CPRA Request Summary (for tracker)\r\n\r\n"
+        "Requester: Jane Roe – jane.roe@example.com\r\n\r\n"
+        "Date Received: Jan 5, 2025\r\n\r\n"
+        "Matter: Budget Inquiry\r\n\r\n"
+        "Record Types: Emails\r\n"
+    )
+    draft = extract_scope(notes)
+    assert draft.request.matter == "Budget Inquiry"

@@ -24,7 +24,10 @@ def extract_scope(notes: str) -> CPRARequestDraft:
     if m:
         received = _parse_date(m.group(1))
     matter = "No matter found"
-    m = re.search(r"Matter:\s*([^\n]+)", notes)
+    # Capture text following "Matter:" regardless of line ending style or case.
+    # Previously the regex only handled Unix newlines which caused the matter
+    # field to be missed when Windows CRLF endings were present.
+    m = re.search(r"Matter\s*:\s*([^\r\n]+)", notes, flags=re.IGNORECASE)
     if m:
         matter = m.group(1).strip()
     range_start = None

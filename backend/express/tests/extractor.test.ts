@@ -22,3 +22,10 @@ test('extractScope parses summary', () => {
   assert.equal(draft.request.range?.end, '2025-01-05');
 });
 
+test('extractScope handles CRLF line endings', () => {
+  const notes =
+    'CPRA Request Summary (for tracker)\r\n\r\nRequester: Jane Roe – jane.roe@example.com\r\n\r\nDate Received: Jan 5, 2025\r\n\r\nMatter: Budget Inquiry\r\n\r\nRecord Types: Emails\r\n';
+  const draft = extractScope(notes);
+  assert.equal(draft.request.matter, 'Budget Inquiry');
+});
+
