@@ -14,6 +14,25 @@ export default function NotesUpload({
 }) {
   const [error, setError] = useState<string | null>(null);
 
+  function toYMD(s: string): string {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? s : d.toISOString().slice(0, 10);
+  }
+
+  function buildRecords(
+    recordTypes: string[] = [],
+    custodians: string[] = [],
+    preferred?: string | null
+  ): string {
+    const lines: string[] = [];
+    if (recordTypes.length)
+      lines.push(`Record Types: ${recordTypes.join(', ')}`);
+    if (custodians.length)
+      lines.push(`Custodians: ${custodians.join(', ')}`);
+    if (preferred) lines.push(`Preferred Format/Delivery: ${preferred}`);
+    return lines.join('\n');
+  }
+
   type Preview = {
     requester: string | null;
     matter: string | null;
@@ -46,10 +65,19 @@ export default function NotesUpload({
     if (notes.trim().length > 0) {
       runExtraction(notes)
         .then(data => {
+          const received = data.request.receivedDate
+            ? toYMD(data.request.receivedDate)
+            : null;
+          data.request.receivedDate = received || '';
+          data.request.description = buildRecords(
+            data.request.recordTypes,
+            data.request.custodians,
+            data.request.preferredFormatDelivery
+          );
           setPreview({
             requester: data.request.requester.name || null,
             matter: data.request.matter || null,
-            received: data.request.receivedDate || null,
+            received,
             recordTypes: data.request.recordTypes || [],
             custodians: data.request.custodians || [],
             preferred: data.request.preferredFormatDelivery || null,
@@ -74,6 +102,14 @@ export default function NotesUpload({
   async function extract() {
     try {
       const data = await runExtraction(notes);
+      data.request.receivedDate = data.request.receivedDate
+        ? toYMD(data.request.receivedDate)
+        : '';
+      data.request.description = buildRecords(
+        data.request.recordTypes,
+        data.request.custodians,
+        data.request.preferredFormatDelivery
+      );
       setError(null);
       return data.request;
     } catch (e) {

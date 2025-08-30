@@ -20,22 +20,35 @@ export default function LettersEditor({
   const [includeSalutation, setIncludeSalutation] = useState(true);
   const [includeContact, setIncludeContact] = useState(true);
 
+  function toYMD(s: string): string {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? s : d.toISOString().slice(0, 10);
+  }
+
+  const received = toYMD(req.receivedDate);
+
   function stripHighlight(h: string) {
     return h.replace(/<span class="merge-field"[^>]*>(.*?)<\/span>/g, '$1');
   }
 
   function highlight(h: string) {
-    return stripHighlight(h).replace(/{{[^}]+}}/g, m => `<span class="merge-field bg-yellow-100" title="From earlier steps">${m}</span>`);
+    const raw = stripHighlight(h);
+    return received
+      ? raw.replaceAll(
+          received,
+          `<span class="merge-field bg-yellow-100" title="From earlier steps">${received}</span>`
+        )
+      : raw;
   }
 
   function applyTone(h: string, friendly: boolean) {
     if (kind === 'ack') {
-      const formal = 'This is to acknowledge receipt of your request on {{receivedDate}}.';
-      const friendlyTxt = "Thanks for your request on {{receivedDate}}. We'll get right on it.";
+      const formal = `This is to acknowledge receipt of your request on ${received}.`;
+      const friendlyTxt = `Thanks for your request on ${received}. We'll get right on it.`;
       return friendly ? h.replace(formal, friendlyTxt) : h.replace(friendlyTxt, formal);
     } else {
-      const formal = 'We require an extension to your request received on {{receivedDate}}.';
-      const friendlyTxt = "We're working on your request from {{receivedDate}} but need a bit more time.";
+      const formal = `We require an extension to your request received on ${received}.`;
+      const friendlyTxt = `We're working on your request from ${received} but need a bit more time.`;
       return friendly ? h.replace(formal, friendlyTxt) : h.replace(friendlyTxt, formal);
     }
   }
@@ -78,7 +91,10 @@ export default function LettersEditor({
 
   useEffect(() => {
     try {
-      const base = kind === 'ack' ? ACK_TEMPLATE : EXT_TEMPLATE;
+      const base = (kind === 'ack' ? ACK_TEMPLATE : EXT_TEMPLATE).replace(
+        /{{receivedDate}}/g,
+        received
+      );
       const h = highlight(base);
       setHtml(h);
       setInitialHtml(h);
