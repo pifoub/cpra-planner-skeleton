@@ -28,8 +28,11 @@ class CPRARequest(BaseModel):
 
     requester: Requester
     receivedDate: str
-    subject: str = ""
+    matter: str = ""
     description: str
+    recordTypes: List[str] = Field(default_factory=list)
+    custodians: List[str] = Field(default_factory=list)
+    preferredFormatDelivery: str = ""
     range: Optional[DateRange] = None
     departments: List[str] = Field(default_factory=list)
     extension: Extension = Field(default_factory=Extension)

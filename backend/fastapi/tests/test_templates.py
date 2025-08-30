@@ -9,7 +9,7 @@ def test_render_letter_ack_uses_nl2br():
     req = CPRARequest(
         requester=Requester(name="Jane", email="jane@example.com"),
         receivedDate="2025-01-01",
-        subject="Test",
+        matter="Test",
         description="Line1\nLine2",
     )
     tl = Timeline(determinationDue="2025-01-10")
@@ -23,7 +23,7 @@ def test_render_letter_extension_includes_reason():
     req = CPRARequest(
         requester=Requester(name="Jane", email="jane@example.com"),
         receivedDate="2025-01-01",
-        subject="Test",
+        matter="Test",
         description="Test",
         extension=Extension(apply=True, reasons=["need more time"]),
     )

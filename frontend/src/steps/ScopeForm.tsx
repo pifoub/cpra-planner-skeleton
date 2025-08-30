@@ -73,7 +73,7 @@ export default function ScopeForm({
   const confirmedCount = [
     f.requester.name,
     f.requester.email,
-    f.subject,
+    f.matter,
     f.receivedDate,
     f.description,
     f.range?.start,
@@ -119,18 +119,18 @@ export default function ScopeForm({
 
       <section>
         <h2 className='font-semibold mb-2'>Request Details</h2>
-        <div className='grid grid-cols-2 gap-4'>
+        <div className='space-y-4'>
           <div>
             <label className='block text-sm text-gray-600'>
-              Subject
-              {edited('subject') && (
+              Matter
+              {edited('matter') && (
                 <span className='ml-2 text-xs text-blue-600'>✎ Edited</span>
               )}
             </label>
             <input
               className='w-full border p-2'
-              value={f.subject}
-              onChange={e => handle('subject', e.target.value)}
+              value={f.matter}
+              onChange={e => handle('matter', e.target.value)}
             />
           </div>
           <div>
@@ -149,7 +149,7 @@ export default function ScopeForm({
               <p className='text-xs text-red-600 mt-1'>{errors.receivedDate}</p>
             )}
           </div>
-          <div className='col-span-2'>
+          <div>
             <label className='block text-sm text-gray-600'>
               Records Sought
               {edited('description') && (
@@ -162,13 +162,22 @@ export default function ScopeForm({
               value={f.description}
               onChange={e => handle('description', e.target.value)}
             />
-            <div className='mt-2 text-sm'>
-              <p>
-                <span className='font-medium'>Subject:</span> {f.subject || <span className='text-gray-400'>N/A</span>}
-              </p>
-              <p>
-                <span className='font-medium'>Logged:</span> {f.receivedDate}
-              </p>
+            <div className='mt-2 text-sm space-y-1'>
+              {f.recordTypes.length > 0 && (
+                <p>
+                  <span className='font-medium'>Record Types:</span> {f.recordTypes.join(', ')}
+                </p>
+              )}
+              {f.custodians.length > 0 && (
+                <p>
+                  <span className='font-medium'>Custodians:</span> {f.custodians.join(', ')}
+                </p>
+              )}
+              {f.preferredFormatDelivery && (
+                <p>
+                  <span className='font-medium'>Preferred Format/Delivery:</span> {f.preferredFormatDelivery}
+                </p>
+              )}
               <textarea
                 className='w-full h-40 border p-2 mt-1'
                 value={notes}
