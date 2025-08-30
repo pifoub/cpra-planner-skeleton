@@ -16,17 +16,20 @@ export default function NotesUpload({
 
   type Preview = {
     requester: string | null;
-    subject: string | null;
+    matter: string | null;
     received: string | null;
     description: string | null;
-    conf: { requester: number; subject: number; received: number; description: number };
+    recordTypes: string[];
+    custodians: string[];
+    preferred: string | null;
+    conf: { requester: number; matter: number; received: number; description: number };
   };
 
   const [preview, setPreview] = useState<Preview | null>(null);
 
   type ExtractResp = {
     request: CPRARequest;
-    confidences: { requester: number; subject: number; receivedDate: number; description: number };
+    confidences: { requester: number; matter: number; receivedDate: number; description: number };
   };
 
   async function runExtraction(text: string): Promise<ExtractResp> {
@@ -46,12 +49,15 @@ export default function NotesUpload({
         .then(data => {
           setPreview({
             requester: data.request.requester.name || null,
-            subject: data.request.subject || null,
+            matter: data.request.matter || null,
             received: data.request.receivedDate || null,
             description: data.request.description || null,
+            recordTypes: data.request.recordTypes || [],
+            custodians: data.request.custodians || [],
+            preferred: data.request.preferredFormatDelivery || null,
             conf: {
               requester: data.confidences.requester,
-              subject: data.confidences.subject,
+              matter: data.confidences.matter,
               received: data.confidences.receivedDate,
               description: data.confidences.description,
             },
@@ -125,9 +131,9 @@ export default function NotesUpload({
             <ConfidenceChip score={preview.conf.requester} />
           </p>
           <p>
-            <span className='font-medium'>Subject:</span>{' '}
-            {preview.subject || <span className='text-gray-400'>N/A</span>}
-            <ConfidenceChip score={preview.conf.subject} />
+            <span className='font-medium'>Matter:</span>{' '}
+            {preview.matter || <span className='text-gray-400'>N/A</span>}
+            <ConfidenceChip score={preview.conf.matter} />
           </p>
           <p>
             <span className='font-medium'>Logged:</span>{' '}
@@ -139,6 +145,24 @@ export default function NotesUpload({
             {preview.description || <span className='text-gray-400'>N/A</span>}
             <ConfidenceChip score={preview.conf.description} />
           </p>
+          {preview.recordTypes.length > 0 && (
+            <p>
+              <span className='font-medium'>Record Types:</span>{' '}
+              {preview.recordTypes.join(', ')}
+            </p>
+          )}
+          {preview.custodians.length > 0 && (
+            <p>
+              <span className='font-medium'>Custodians:</span>{' '}
+              {preview.custodians.join(', ')}
+            </p>
+          )}
+          {preview.preferred && (
+            <p>
+              <span className='font-medium'>Preferred Format/Delivery:</span>{' '}
+              {preview.preferred}
+            </p>
+          )}
         </div>
       )}
       {error && <p className='text-red-600'>{error}</p>}

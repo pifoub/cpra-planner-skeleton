@@ -1,49 +1,58 @@
 import type { CPRARequest, CPRARequestDraft, Requester } from './types.js';
 
-const EMAIL_RE = /[\w\.-]+@[\w\.-]+/;
-const DATE_RE = /(\b\d{4}-\d{2}-\d{2}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}\b)/i;
-
-/** Return the first email address found in `text` or `null`. */
-function firstEmail(text: string): string | null {
-  const m = text.match(EMAIL_RE);
-  return m ? m[0] : null;
-}
-
-/** Return the first date-like string found in `text` or `null`. */
-function firstDate(text: string): string | null {
-  const m = text.match(DATE_RE);
-  if (!m) return null;
-  const raw = m[0];
+function parseDate(raw: string): string {
   const d = new Date(raw);
   return isNaN(d.getTime()) ? raw : d.toISOString().slice(0, 10);
 }
 
-/** Derive a draft CPRA request from free-form meeting notes. */
+/** Derive a draft CPRA request from a structured CPRA summary. */
 export function extractScope(notes: string): CPRARequestDraft {
-  const email = firstEmail(notes) || 'requester@example.com';
   let name = 'Unknown Requester';
-  const nameMatch = notes.match(/(?:from|by|request(?:or|ed) by|requester)[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i);
-  if (nameMatch) name = nameMatch[1];
-  const received = firstDate(notes) || '2025-01-01';
-  let subject = 'No subject found';
-  const subjectMatch = notes.match(/subject[:\s]+(.+)/i);
-  if (subjectMatch) subject = subjectMatch[1].trim();
-  let desc = 'All emails related to agenda item';
-  const descMatch =
-    notes.match(/records sought[:\s]+(.+)/i) || notes.match(/request[:\s]+(.+)/i);
-  if (descMatch) desc = descMatch[1].trim();
+  let email = 'requester@example.com';
+  const rm = notes.match(/Requester:\s*(.*?)\s*[\u2013-]\s*(\S+)/);
+  if (rm) {
+    name = rm[1].trim();
+    email = rm[2].trim();
+  }
+  let received = '2025-01-01';
+  const dm = notes.match(/Date Received:\s*([^\n]+)/);
+  if (dm) received = parseDate(dm[1]);
+  let matter = 'No matter found';
+  const sm = notes.match(/Matter:\s*([^\n]+)/);
+  if (sm) matter = sm[1].trim();
+  let rangeStart: string | undefined;
+  let rangeEnd: string | undefined = received;
+  const rmRange = notes.match(/Time Range:\s*([^\n]+)/);
+  if (rmRange) {
+    const parts = rmRange[1].split(/\s*[\u2013-]\s*/);
+    if (parts.length === 2) {
+      rangeStart = parseDate(parts[0]);
+      rangeEnd = parseDate(parts[1]);
+    }
+  }
+  let recordText = '';
+  const rt = notes.match(/Record Types:\s*([^\n]+)/);
+  const recordTypes = rt ? rt[1].split(/[;,]/).map(s => s.trim()).filter(Boolean) : [];
+  if (rt) recordText = rt[1].trim();
+  const cust = notes.match(/Custodians:\s*([^\n]+)/);
+  const custodians = cust ? cust[1].split(/[;,]/).map(s => s.trim()).filter(Boolean) : [];
+  const pf = notes.match(/Preferred Format\/Delivery:\s*([^\n]+)/);
+  const preferred = pf ? pf[1].trim() : '';
   const requester: Requester = { name, email };
   const draft: CPRARequest = {
     requester,
     receivedDate: received,
-    subject,
-    description: desc,
-    range: { start: '2024-01-01', end: received },
+    matter,
+    description: recordText,
+    recordTypes,
+    custodians,
+    preferredFormatDelivery: preferred,
+    range: { start: rangeStart, end: rangeEnd },
     departments: [],
     extension: { apply: false, reasons: [] },
   };
   return {
     request: draft,
-    confidences: { requester: 0.6, receivedDate: 0.7, subject: 0.6, description: 0.6 },
+    confidences: { requester: 0.6, receivedDate: 0.7, matter: 0.6, description: 0.6 },
   };
 }

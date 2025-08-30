@@ -1,62 +1,66 @@
 
 import re
-from ..models import CPRARequestDraft, CPRARequest, Requester, DateRange, Extension
+from ..models import CPRARequestDraft, CPRARequest, Requester, DateRange
 
-EMAIL_RE = re.compile(r'[\w\.-]+@[\w\.-]+')
-DATE_RE = re.compile(
-    r'(\b\d{4}-\d{2}-\d{2}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}\b)',
-    re.I,
-)
-
-def _first_email(text):
-    """Return the first email address found in ``text`` or ``None``."""
-    m = EMAIL_RE.search(text)
-    return m.group(0) if m else None
-
-def _first_date(text):
-    """Return the first date-like string found in ``text`` or ``None``."""
-    m = DATE_RE.search(text)
-    if not m:
-        return None
-    raw = m.group(0)
+def _parse_date(s: str) -> str:
     from dateutil import parser
 
     try:
-        return parser.parse(raw).date().isoformat()
-    except Exception:  # pragma: no cover - fallback for unparsable dates
-        return raw
+        return parser.parse(s).date().isoformat()
+    except Exception:
+        return s
+
 
 def extract_scope(notes: str) -> CPRARequestDraft:
-    """Derive a draft CPRA request from free-form meeting notes."""
-    email = _first_email(notes) or "requester@example.com"
+    """Derive a draft CPRA request from a structured CPRA summary."""
     name = "Unknown Requester"
-    m = re.search(
-        r'(?:from|by|request(?:or|ed) by|requester)[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)',
-        notes,
-        re.I,
-    )
+    email = "requester@example.com"
+    m = re.search(r"Requester:\s*(.*?)\s*[\u2013\-]\s*(\S+)", notes)
     if m:
-        name = m.group(1)
-    received = _first_date(notes) or "2025-01-01"
-    subject = "No subject found"
-    ms = re.search(r'subject[:\s]+(.+)', notes, re.I)
-    if ms:
-        subject = ms.group(1).strip()
-    desc = "All emails related to agenda item"
-    md = re.search(r'records sought[:\s]+(.+)', notes, re.I)
-    if not md:
-        md = re.search(r'request[:\s]+(.+)', notes, re.I)
-    if md:
-        desc = md.group(1).strip()
+        name = m.group(1).strip()
+        email = m.group(2).strip()
+    received = "2025-01-01"
+    m = re.search(r"Date Received:\s*([^\n]+)", notes)
+    if m:
+        received = _parse_date(m.group(1))
+    matter = "No matter found"
+    m = re.search(r"Matter:\s*([^\n]+)", notes)
+    if m:
+        matter = m.group(1).strip()
+    range_start = None
+    range_end = received
+    m = re.search(r"Time Range:\s*([^\n]+)", notes)
+    if m:
+        parts = re.split(r"\s*[\u2013\-]\s*", m.group(1))
+        if len(parts) == 2:
+            range_start = _parse_date(parts[0])
+            range_end = _parse_date(parts[1])
+    record_types: list[str] = []
+    record_text = ""
+    m = re.search(r"Record Types:\s*([^\n]+)", notes)
+    if m:
+        record_text = m.group(1).strip()
+        record_types = [s.strip() for s in re.split(r"[;,]", record_text) if s.strip()]
+    custodians: list[str] = []
+    m = re.search(r"Custodians:\s*([^\n]+)", notes)
+    if m:
+        custodians = [s.strip() for s in re.split(r"[;,]", m.group(1)) if s.strip()]
+    pref = ""
+    m = re.search(r"Preferred Format/Delivery:\s*([^\n]+)", notes)
+    if m:
+        pref = m.group(1).strip()
     draft = CPRARequest(
         requester=Requester(name=name, email=email),
         receivedDate=received,
-        subject=subject,
-        description=desc,
-        range=DateRange(start="2024-01-01", end=received),
+        matter=matter,
+        description=record_text,
+        recordTypes=record_types,
+        custodians=custodians,
+        preferredFormatDelivery=pref,
+        range=DateRange(start=range_start, end=range_end),
         departments=[],
     )
     return CPRARequestDraft(
         request=draft,
-        confidences={"requester": 0.6, "receivedDate": 0.7, "subject": 0.6, "description": 0.6},
+        confidences={"requester": 0.6, "receivedDate": 0.7, "matter": 0.6, "description": 0.6},
     )

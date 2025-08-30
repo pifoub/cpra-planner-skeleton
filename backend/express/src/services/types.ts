@@ -17,8 +17,11 @@ export interface Extension {
 export interface CPRARequest {
   requester: Requester;
   receivedDate: string;
-  subject: string;
+  matter: string;
   description: string;
+  recordTypes: string[];
+  custodians: string[];
+  preferredFormatDelivery: string;
   range?: DateRange;
   departments: string[];
   extension: Extension;

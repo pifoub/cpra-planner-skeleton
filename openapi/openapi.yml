@@ -150,12 +150,25 @@ components:
         receivedDate:
           type: string
           title: Receiveddate
-        subject:
+        matter:
           type: string
-          title: Subject
+          title: Matter
         description:
           type: string
           title: Description
+        recordTypes:
+          items:
+            type: string
+          type: array
+          title: RecordTypes
+        custodians:
+          items:
+            type: string
+          type: array
+          title: Custodians
+        preferredFormatDelivery:
+          type: string
+          title: PreferredFormatDelivery
         range:
           anyOf:
           - $ref: '#/components/schemas/DateRange'
@@ -171,7 +184,7 @@ components:
       required:
       - requester
       - receivedDate
-      - subject
+      - matter
       - description
       title: CPRARequest
     CPRARequestDraft:

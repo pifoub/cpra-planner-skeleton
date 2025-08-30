@@ -7,8 +7,11 @@ import { computeTimeline } from '../src/services/rules.js';
 const baseReq = {
   requester: { name: 'Jane', email: 'jane@example.com' },
   receivedDate: '01/15/2025',
-  subject: 'Records',
+  matter: 'Records',
   description: 'Records',
+  recordTypes: [],
+  custodians: [],
+  preferredFormatDelivery: '',
   range: {},
   departments: [],
   extension: { apply: true, reasons: [] },

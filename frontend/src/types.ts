@@ -1,1 +1,21 @@
-export type CPRARequest = { requester:{name:string;org?:string;email?:string}; receivedDate:string; subject:string; description:string; range?:{start?:string;end?:string}; departments:string[]; extension:{apply:boolean;reasons:string[]} }; export type Timeline = { determinationDue:string; extensionDue?:string|null; milestones:{label:string; due:string}[] }; export type LetterKind='ack'|'extension'
+export type CPRARequest = {
+  requester: { name: string; org?: string; email?: string };
+  receivedDate: string;
+  matter: string;
+  description: string;
+  recordTypes: string[];
+  custodians: string[];
+  preferredFormatDelivery: string;
+  range?: { start?: string; end?: string };
+  departments: string[];
+  extension: { apply: boolean; reasons: string[] };
+};
+
+export type Timeline = {
+  determinationDue: string;
+  extensionDue?: string | null;
+  milestones: { label: string; due: string }[];
+};
+
+export type LetterKind = 'ack' | 'extension';
+

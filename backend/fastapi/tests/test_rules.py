@@ -29,7 +29,7 @@ def test_compute_timeline_with_extension():
     req = CPRARequest(
         requester=Requester(name="Jane", email="jane@example.com"),
         receivedDate="2025-01-15",
-        subject="Budget",
+        matter="Budget",
         description="Budget docs",
         extension=Extension(apply=True),
     )
