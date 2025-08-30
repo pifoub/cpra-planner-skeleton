@@ -6,11 +6,9 @@ import type { CPRARequest } from '../types';
  */
 export default function ScopeForm({
   draft,
-  notes,
   registerNext,
 }: {
   draft: CPRARequest;
-  notes: string;
   registerNext: (fn: () => { data: CPRARequest; edited: boolean }, ready?: boolean) => void;
 }) {
   const [f, setF] = useState<CPRARequest>(draft);
@@ -158,32 +156,10 @@ export default function ScopeForm({
             </label>
             <textarea
               className='w-full border p-2'
-              rows={4}
+              rows={6}
               value={f.description}
               onChange={e => handle('description', e.target.value)}
             />
-            <div className='mt-2 text-sm space-y-1'>
-              {f.recordTypes.length > 0 && (
-                <p>
-                  <span className='font-medium'>Record Types:</span> {f.recordTypes.join(', ')}
-                </p>
-              )}
-              {f.custodians.length > 0 && (
-                <p>
-                  <span className='font-medium'>Custodians:</span> {f.custodians.join(', ')}
-                </p>
-              )}
-              {f.preferredFormatDelivery && (
-                <p>
-                  <span className='font-medium'>Preferred Format/Delivery:</span> {f.preferredFormatDelivery}
-                </p>
-              )}
-              <textarea
-                className='w-full h-40 border p-2 mt-1'
-                value={notes}
-                readOnly
-              />
-            </div>
           </div>
         </div>
       </section>

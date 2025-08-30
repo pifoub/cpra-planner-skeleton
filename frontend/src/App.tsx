@@ -153,7 +153,7 @@ export default function App() {
             <NotesUpload notes={notes} setNotes={setNotes} registerNext={registerNext} />
           )}
           {step === 1 && req && (
-            <ScopeForm draft={req} notes={notes} registerNext={registerNext} />
+            <ScopeForm draft={req} registerNext={registerNext} />
           )}
           {step === 1 && !req && (
             <div className='text-red-600'>Missing request data. Please go back and retry extraction.</div>
